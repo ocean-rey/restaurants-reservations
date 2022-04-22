@@ -23,8 +23,8 @@ model RefreshToken {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   id  String  @id @unique @default(uuid())
-  userID  String
+  userId  String
   hashedToken String
   revoked Boolean @default(false)
-  User User @relation(fields: [userID], references: [id], onDelete: Cascade)
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

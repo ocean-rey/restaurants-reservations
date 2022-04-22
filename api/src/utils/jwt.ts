@@ -1,5 +1,6 @@
 import { User } from "@prisma/client";
-import jwt from "jsonwebtoken"
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 export function generateAccessToken(user: User) {
     return jwt.sign({ userId: user.id }, process.env.JWT_ACCESS_SECRET, {
@@ -15,4 +16,8 @@ export function generateTokens(user: User, jti: string) {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user, jti);
     return { accessToken, refreshToken };
+}
+
+export function hashToken(token: string) {
+    return crypto.createHash('sha256').update(token).digest('hex');
 }

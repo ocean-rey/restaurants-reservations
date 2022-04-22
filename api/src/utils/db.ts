@@ -1,4 +1,4 @@
 import { PrismaClient } from "@prisma/client";
 const db = new PrismaClient();
-
-module.exports = { db };
+export const Users = db.user;
+export const RefreshTokens = db.refreshToken;
