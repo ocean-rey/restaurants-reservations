@@ -3,6 +3,7 @@
 FROM node:16 AS deps
 WORKDIR /usr/src/app
 COPY package*.json ./
+COPY prisma ./prisma
 RUN npm ci
 # run prisma:generate to prepare the prisma client
 # end of deps stage

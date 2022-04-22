@@ -2,4 +2,4 @@
 echo "*** Starting Dev Build ***"
 npm run prisma:migrate && \
 npm run prisma:push && \
-npm run dev
+npm run start

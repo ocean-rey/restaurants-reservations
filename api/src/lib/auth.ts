@@ -10,7 +10,7 @@ export function findRefreshTokenById(id: string) {
     return RefreshTokens.findUnique({ where: { id } })
 }
 
-export function revokeToken(id: string) {
+export function revokeRefreshToken(id: string) {
     return RefreshTokens.update({ where: { id }, data: { revoked: true } })
 }
 
