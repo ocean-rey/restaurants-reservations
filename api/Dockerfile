@@ -1,10 +1,10 @@
 # using stages
-
 # prepare deps
 FROM node:16 AS deps
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm ci
+# run prisma:generate to prepare the prisma client
 # end of deps stage
 
 # build app
@@ -17,9 +17,13 @@ RUN npm run build
 
 FROM node:16 AS RUNNER
 WORKDIR /usr/src/app
+EXPOSE 3000
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package.json ./
 COPY --from=builder /usr/src/app/dist ./dist
-EXPOSE 3000
-CMD ["npm", "run", "start"]
+COPY --from=builder /usr/src/app/prisma ./prisma
+COPY --from=builder /usr/src/app/startup.sh ./startup.sh
+COPY --from=builder /usr/src/app/.env ./.env
+RUN chmod +x startup.sh
+CMD ["./startup.sh"]
 
