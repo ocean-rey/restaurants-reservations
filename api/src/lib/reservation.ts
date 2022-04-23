@@ -111,17 +111,20 @@ export async function getAvailableSlots(numSeats: number) {
                 timeCursor = currentReservation.endTime.getTime();
                 continue
             }
+            // handle when there are no more reservations but there is some extra time at eod
+            if (rIndex === reservations.length - 1 && Math.abs(timeCursor - closingTime) < 60000) {
+                console.log("remainint time at end")
+                timeBlocks[tIndex].push({ start: timeCursor, end: closingTime })
+            }
             // handle continuous reservations
-            if (Math.abs(timeCursor - currentReservation.startTime.getTime()) < 6e4) {
+            if (Math.abs(timeCursor - currentReservation.startTime.getTime()) < 60000) {
+                console.log("continues reservation; skipping")
                 timeCursor = currentReservation.endTime.getTime();
                 continue
             }
+            console.log("finished checking edge cases")
             timeBlocks[tIndex].push({ start: timeCursor, end: currentReservation.startTime.getTime() })
             timeCursor = currentReservation.endTime.getTime();
-            // handle when there are no more reservations but there is some extra time at eod
-            if (rIndex === reservations.length - 1 && timeCursor < closingTime) {
-                timeBlocks[tIndex].push({ start: timeCursor, end: closingTime })
-            }
         }
     }
     // timeBlocks are set up; now we need to clean up.
