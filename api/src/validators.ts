@@ -40,6 +40,7 @@ export const tableExists: CustomValidator = value => {
         if (!value) {
             return Promise.reject("No id provided")
         }
+        value = parseInt(value)
         return Tables.findUnique({ where: { id: value } }).then((table => {
             if (!table) {
                 return Promise.reject("Table doesn't exist")
