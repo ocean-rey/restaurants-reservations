@@ -29,7 +29,7 @@ router.post("/register-admin",
             const user = await createUser({ empNumber, password, role: "Admin", name: name ?? null })
             const { accessToken, refreshToken } = generateTokens(user, jti)
             await whiteListRefreshToken({ jti, refreshToken, userId: user.id })
-            res.status(200).json({ accessToken, refreshToken }).send()
+            return res.status(200).json({ accessToken, refreshToken }).send()
         } catch (error) {
             console.error(error)
             return res.status(500).send()
