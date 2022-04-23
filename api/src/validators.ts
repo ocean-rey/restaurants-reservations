@@ -20,7 +20,7 @@ export const isNewEmployee: CustomValidator = value => {
 
 export const isNewTable: CustomValidator = value => {
     try {
-        if (!value) {
+        if (!value && value != '0') {
             return Promise.reject("No id provided")
         }
         return Tables.findUnique({ where: { id: value } }).then((table => {
@@ -37,7 +37,7 @@ export const isNewTable: CustomValidator = value => {
 
 export const tableExists: CustomValidator = value => {
     try {
-        if (!value) {
+        if (!value && value != '0') {
             return Promise.reject("No id provided")
         }
         value = parseInt(value)
