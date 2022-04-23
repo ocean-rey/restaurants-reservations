@@ -1,6 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import auth from "./routes/auth"
+import table from "./routes/table"
 
 const app = express()
 const port = 3000
@@ -11,6 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const router = express.Router()
 router.use("/auth", auth)
+router.use("/table", table)
 app.use(router)
 
 app.listen(port, () => {
