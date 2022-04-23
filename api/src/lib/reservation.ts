@@ -2,13 +2,18 @@ import { Reservations, Tables } from "../utils/db";
 import { getTables } from "./table";
 
 
-export async function getReservations() {
-    const reservations = await Reservations.findMany({ include: { Table: true } });
+export async function getReservations(page?: number) {
+    const reservations = await Reservations.findMany(
+        {
+            take: 10,
+            skip: page ? page * 10 : 0,
+            include: { Table: true }
+        });
     const cleanedReservations = reservations.map(({ Table, startTime, endTime, id }) => ({ table: { id: Table.id, numSeats: Table.numSeats }, startTime, endTime }));
     return cleanedReservations;
 }
 
-export async function getTodayReservations() {
+export async function getTodayReservations(page?: number) {
     // note that this function uses server time
     const today = new Date();
     const todayString = `${today.getFullYear}-${today.getMonth}-${today.getDate}`
@@ -16,6 +21,8 @@ export async function getTodayReservations() {
     const closeTime = "T23:59"
     const reservations = await Reservations.findMany(
         {
+            take: 10,
+            skip: page ? page * 10 : 0,
             where: {
                 startTime:
                     { gte: todayString + openTime },
@@ -43,9 +50,9 @@ export async function reserveTable({ startTime, endTime, numSeats }: ReserveTabl
                 numSeats: { gte: numSeats }
             }
         })
-        if(!availableTable){
-            throw new Error("No table available with specified parameters!")
-        }
+    if (!availableTable) {
+        throw new Error("No table available with specified parameters!")
+    }
 }
 
 type ReserveTableParams = {
