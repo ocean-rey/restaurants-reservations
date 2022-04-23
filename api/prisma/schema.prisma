@@ -51,5 +51,5 @@ model Reservation {
   tableId   Int
   startTime DateTime
   endTime   DateTime
-  Table Table @relation(fields: [tableId], references: [id])
+  Table     Table    @relation(fields: [tableId], references: [id])
 }
