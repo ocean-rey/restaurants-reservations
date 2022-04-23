@@ -9,7 +9,7 @@ export function generateAccessToken(user: User) {
 }
 
 export function generateRefreshToken(user: User, jti: string) {
-    return jwt.sign({ userId: user.id, jti }, process.env.JWT_ACCESS_SECRET, { expiresIn: '48h' });
+    return jwt.sign({ userId: user.id, jti }, process.env.JWT_REFRESH_SECRET, { expiresIn: '48h' });
 }
 
 export function generateTokens(user: User, jti: string) {

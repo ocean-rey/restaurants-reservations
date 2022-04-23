@@ -91,7 +91,7 @@ router.post("/login",
         }
     })
 
-router.post("/refreshToken", async (req, res) => {
+router.post("/refresh-token", async (req, res) => {
     try {
         const { refreshToken } = req.body;
         if (!refreshToken) {
