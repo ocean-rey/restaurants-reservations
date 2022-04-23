@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken"
 import { generateTokens, hashToken } from "../utils/jwt"
 import { findRefreshTokenById, revokeRefreshToken, revokeUserTokens, whiteListRefreshToken } from "../lib/auth"
 import { findUserById, createUser, findUserByempNumber } from "../lib/user"
-import { requireClean, requireRole } from "../middleware"
+import { requireAdmin, requireClean, requireRole } from "../middleware"
 import { isNewEmployee } from "../validators";
 
 const router = Router()
@@ -37,7 +37,7 @@ router.post("/register-admin",
     })
 
 router.post("/create-user",
-    requireRole,
+    requireAdmin,
     body("password").isLength({ min: 6 }),
     body("role").isString().isIn(["Admin", "Employee"]).withMessage(`must be one of "Admin, Employee"`),
     body("empNumber").isNumeric().withMessage("must be numeric string")
