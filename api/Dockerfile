@@ -23,8 +23,8 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package.json ./
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/prisma ./prisma
-COPY --from=builder /usr/src/app/startup.sh ./startup.sh
+COPY --from=builder /usr/src/app/scripts ./scripts
 COPY --from=builder /usr/src/app/.env ./.env
-RUN chmod +x startup.sh
-CMD ["./startup.sh"]
+RUN chmod +x ./script/*.sh
+CMD ["./scripts/wait-for-it.sh", "db:5432", "--", "./scripts/startup.sh"]
 
