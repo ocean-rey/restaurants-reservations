@@ -52,3 +52,13 @@ export const tableExists: CustomValidator = value => {
         return Promise.reject("Unable to get table")
     }
 }
+
+export const noReservations: CustomValidator = value => {
+    try {
+        if(!value && value != '0'){
+            
+        }
+    } catch (error) {
+        
+    }
+}
