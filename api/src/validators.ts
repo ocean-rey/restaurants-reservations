@@ -54,13 +54,20 @@ export const tableExists: CustomValidator = value => {
 }
 
 export const noReservations: CustomValidator = value => {
+    // requirment: "Do not allow a table to be deleted if the table has any reservations to it."
+    // conflicting requirment: The API shouldn't allow the deletion of a reservation in the past
+    // result: if a table at any point ever had a reservation; it cannot be deleted. this could be solved
+    // if the first requirment is reworded: Do not allow a table to be deleted if the table has any /future/ reservations."
+    // for now; i will build according to the design document but this should be re-analyzed
     try {
         if(!value && value != '0'){
             return Promise.reject("No id provided")
         }
         value = parseInt(value)
         return Reservations.count({where: {tableId: value}}).then((count)=>{
-            
+            if (count != 0){
+                return Promise.reject("Cannot delete table with reservations")
+            }
         })
     } catch (error) {
         
