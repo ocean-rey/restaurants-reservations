@@ -106,23 +106,29 @@ export async function getAvailableSlots(numSeats: number) {
         timeBlocks[tIndex] = []
         for (let rIndex = 0; rIndex < reservations.length; rIndex++) {
             const currentReservation = reservations[rIndex];
+            // handle when there are no more reservations but there is some extra time at eod
+            if (rIndex === reservations.length - 1 && Math.abs(timeCursor - closingTime) < 60000) {
+                // if we get here; we also need to check this case before pushing
+                if (rIndex === 0 && currentReservation.startTime.getTime() < timeCursor) {
+                    console.log("Congratulations on finding the edgiest edge case.")
+                    timeCursor = currentReservation.endTime.getTime();
+                }
+                console.log("No more reservations; using remaining time.")
+                timeBlocks[tIndex].push({ start: timeCursor, end: closingTime })
+                continue
+            }
             // special case to handle for the first returned reservation if it starts before current time
             if (rIndex === 0 && currentReservation.startTime.getTime() < timeCursor) {
                 timeCursor = currentReservation.endTime.getTime();
                 continue
             }
-            // handle when there are no more reservations but there is some extra time at eod
-            if (rIndex === reservations.length - 1 && Math.abs(timeCursor - closingTime) < 60000) {
-                console.log("remainint time at end")
-                timeBlocks[tIndex].push({ start: timeCursor, end: closingTime })
-            }
             // handle continuous reservations
             if (Math.abs(timeCursor - currentReservation.startTime.getTime()) < 60000) {
-                console.log("continues reservation; skipping")
+                console.log("continuous reservations; skipping")
                 timeCursor = currentReservation.endTime.getTime();
                 continue
             }
-            console.log("finished checking edge cases")
+            console.log("No edge cases found, continuing normally.")
             timeBlocks[tIndex].push({ start: timeCursor, end: currentReservation.startTime.getTime() })
             timeCursor = currentReservation.endTime.getTime();
         }
