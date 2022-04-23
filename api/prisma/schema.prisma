@@ -35,3 +35,18 @@ model RefreshToken {
   revoked Boolean @default(false)
   User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Table{
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  id Int @unique @id
+  numSeats Int 
+}
+
+model Reservation{
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  id String @id @unique@default(uuid())
+  startTime DateTime
+  endTime DateTime
+}
