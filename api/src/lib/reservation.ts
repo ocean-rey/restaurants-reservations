@@ -93,7 +93,7 @@ export async function getAvailableSlots(numSeats: number) {
         })
     // if there exists a minimal table without any reservations; we are done
     if (validTables[0].reservations.length === 0) {
-        return toMeridianTime({ start: currentDate, end: closingDate })
+        return [toMeridianTime({ start: currentDate, end: closingDate })] // wrapping in array for consistancy 
     }
     // if not; we have some work to do
     // 2d array
@@ -108,6 +108,11 @@ export async function getAvailableSlots(numSeats: number) {
             const currentReservation = reservations[rIndex];
             // special case to handle for the first returned reservation if it starts before current time
             if (rIndex === 0 && currentReservation.startTime.getTime() < timeCursor) {
+                timeCursor = currentReservation.endTime.getTime();
+                continue
+            }
+            // handle continuous reservations
+            if (Math.abs(timeCursor - currentReservation.startTime.getTime()) < 6e4) {
                 timeCursor = currentReservation.endTime.getTime();
                 continue
             }
