@@ -3,7 +3,7 @@ import { body, query, validationResult } from "express-validator";
 import { createTable, deleteTable, getTables } from "../lib/table";
 
 import { requireAdmin, requireRole } from "../middleware"
-import { isNewTable, tableExists } from "../validators";
+import { isNewTable, noReservations, tableExists } from "../validators";
 
 const router = Router();
 
@@ -38,7 +38,7 @@ router.post("/create", requireAdmin,
 
 
 router.delete("/", requireAdmin,
-    query("id").isNumeric().withMessage("Table id must be numerical").custom(tableExists),
+    query("id").isNumeric().withMessage("Table id must be numerical").custom(tableExists).custom(noReservations),
     async (req, res) => {
         try {
             const errors = validationResult(req);
