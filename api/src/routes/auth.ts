@@ -50,11 +50,9 @@ router.post("/create-user",
                 return res.status(400).json({ errors: errors.array() });
             }
             const { empNumber, password, role, name } = req.body;
-            const jti = uuidv4()
             const user = await createUser({ empNumber, password, role, name: name ?? null })
-            const { accessToken, refreshToken } = generateTokens(user, jti)
-            await whiteListRefreshToken({ jti, refreshToken, userId: user.id })
-            res.status(200).json({ accessToken, refreshToken }).send()
+            const {password: foo, ...output} = user; // es6 spread and deconstruction. foo is not used
+            res.status(200).json(output).send()
         } catch (error) {
             console.error(error);
             return res.status(500)

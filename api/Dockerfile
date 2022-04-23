@@ -25,6 +25,6 @@ COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/prisma ./prisma
 COPY --from=builder /usr/src/app/scripts ./scripts
 COPY --from=builder /usr/src/app/.env ./.env
-RUN chmod +x ./script/*.sh
+RUN chmod +x ./scripts/*.sh
 CMD ["./scripts/wait-for-it.sh", "db:5432", "--", "./scripts/startup.sh"]
 
