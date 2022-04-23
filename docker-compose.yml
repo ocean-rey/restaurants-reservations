@@ -1,8 +1,8 @@
 services:
   db:
     image: postgres:latest
-    ports:
-      - 5432:5432
+    expose:
+      - 5432
     environment: # change these values for production
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
@@ -13,9 +13,10 @@ services:
     build:
       context: ./api
     expose:
-      - "3000"
+      - 3000
     depends_on:
       - db
+      - redis
   nginx:
     image: nginx:latest
     ports:
@@ -24,3 +25,9 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - api
+  redis:
+    image: redis
+    volumes:
+      - ./.cache:/var/lib/redis
+    expose:
+      - 6379
