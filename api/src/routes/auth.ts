@@ -70,16 +70,16 @@ router.post("/login",
                 // for the login route, i decided against sending back information on request validation failure
                 // the reasoning for this is to prevent attackers from gaining information on possible login combinations
                 // that said; we can still safetly check for validation errors, saving time by not bothering to check the db
-                return res.status(403).send("Invalid credentials");
+                return res.status(401).send("Invalid credentials");
             }
             const { empNumber, password } = req.body;
             const existingUser = await findUserByempNumber(empNumber);
             if (!existingUser) {
-                return res.status(403).send("Invalid credentials");
+                return res.status(401).send("Invalid credentials");
             }
             const validPassword = await bcrypt.compare(password, existingUser.password);
             if (!validPassword) {
-                return res.status(403).send("Invalid credentials");
+                return res.status(401).send("Invalid credentials");
             }
             await revokeUserTokens(existingUser.id); // kill existing sessions if any
             const jti = uuidv4();

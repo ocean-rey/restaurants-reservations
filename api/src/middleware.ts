@@ -5,7 +5,7 @@ import { Users } from "./utils/db";
 import cache from "./utils/cache"
 import { findUserById } from "./lib/user";
 
-// TODO
+
 export const requireRole = async (req: Request, res: Response, next: NextFunction) => {
     const { authorization } = req.headers;
     if (!authorization) {
@@ -34,21 +34,13 @@ export const requireRole = async (req: Request, res: Response, next: NextFunctio
     return next();
 }
 
-// TODO
-export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
-    const { authorization } = req.headers;
-    if (!authorization) {
-        return res.status(401).send();
+// some middleware chaining; needs testing
+export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => requireRole(req, res, ()=>{
+    if(req.role != "Admin"){
+        return res.status(403).send()
     }
-    try {
-        // it would be faster than redis to simply store the role in the jwt
-        // but that wasn't the task requirment so i'll do it this way
-    } catch (error) {
-        return res.status(401).send()
-    }
-    return next();
-}
-
+    return next()
+})
 export const requireClean = async (req: Request, res: Response, next: NextFunction) => {
     // check that the db is actually clean
     const count = await Users.count();
