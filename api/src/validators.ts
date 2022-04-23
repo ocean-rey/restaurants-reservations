@@ -1,5 +1,5 @@
 import { CustomValidator } from "express-validator"
-import { Tables, Users } from "./utils/db"
+import { Reservations, Tables, Users } from "./utils/db"
 
 export const isNewEmployee: CustomValidator = value => {
     try {
@@ -56,8 +56,12 @@ export const tableExists: CustomValidator = value => {
 export const noReservations: CustomValidator = value => {
     try {
         if(!value && value != '0'){
-            
+            return Promise.reject("No id provided")
         }
+        value = parseInt(value)
+        return Reservations.count({where: {tableId: value}}).then((count)=>{
+            
+        })
     } catch (error) {
         
     }
