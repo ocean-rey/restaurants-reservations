@@ -107,7 +107,7 @@ export async function getAvailableSlots(numSeats: number) {
         for (let rIndex = 0; rIndex < reservations.length; rIndex++) {
             const currentReservation = reservations[rIndex];
             // handle when there are no more reservations but there is some extra time at eod
-            if (rIndex === reservations.length - 1 && Math.abs(timeCursor - closingTime) < 60000) {
+            if (rIndex === reservations.length - 1 && Math.abs(timeCursor - closingTime) > 60000) {
                 // if we get here; we also need to check this case before pushing
                 if (rIndex === 0 && currentReservation.startTime.getTime() < timeCursor) {
                     console.log("Congratulations on finding the edgiest edge case.")
