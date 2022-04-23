@@ -19,7 +19,7 @@ router.get("/all", requireAdmin, async (req, res) => {
 
 router.post("/create", requireAdmin,
     body("tableNumber").isInt().withMessage("table number (id) must be an integer")
-        .custom(isNewTable).withMessage("provided tableNumber belongs to an existing table!"),
+        .custom(isNewTable),
     body("numSeats").isInt({ min: 1, max: 12 }).withMessage("numSeats must be an integer within range [1:12]"),
     async (req, res) => {
         try {

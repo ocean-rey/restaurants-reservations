@@ -6,21 +6,33 @@ export const isNewEmployee: CustomValidator = value => {
         if (user) {
             return Promise.reject("Employee ID already in use")
         }
-    }))
+    })).catch(err => null) // no op if error
 }
 
 export const isNewTable: CustomValidator = value => {
-    return Tables.findUnique({ where: { id: value } }).then((table => {
-        if (table) {
-            return Promise.reject("Table ID already exists")
-        }
-    }))
+    try {
+        return Tables.findUnique({ where: { id: value } }).then((table => {
+            if (table) {
+                return Promise.reject("Table ID already exists")
+            }
+        }))
+    } catch (error) {
+        // technically should be a no-op
+        // logging just in case
+        console.error(error)
+    }
 }
 
 export const tableExists: CustomValidator = value => {
-    return Tables.findUnique({where: {id: value}}).then((table => {
-        if(!table){
-            return Promise.reject("Table does not exist")
-        }
-    }))
+    try {
+        return Tables.findUnique({ where: { id: value } }).then((table => {
+            if (!table) {
+                return Promise.reject("Table doesn't exist")
+            }
+        }))
+    } catch (error) {
+        // logging just in case
+        console.error(error)
+        return Promise.reject("Unable to get table")
+    }
 }
