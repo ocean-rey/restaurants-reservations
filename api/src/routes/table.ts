@@ -7,7 +7,7 @@ import { isNewTable, tableExists } from "../validators";
 
 const router = Router();
 
-router.get("/all", requireAdmin, async (req, res) => {
+router.get("/", requireAdmin, async (req, res) => {
     try {
         const tables = await getTables()
         return res.status(200).json({ tables })
@@ -37,7 +37,7 @@ router.post("/create", requireAdmin,
     })
 
 
-router.delete("/delete", requireAdmin,
+router.delete("/", requireAdmin,
     query("id").isNumeric().withMessage("Table id must be numerical").custom(tableExists),
     async (req, res) => {
         try {
