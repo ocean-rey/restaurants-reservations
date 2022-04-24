@@ -9,6 +9,7 @@ import { findRefreshTokenById, revokeRefreshToken, revokeUserTokens, whiteListRe
 import { findUserById, createUser, findUserByempNumber } from "../lib/user"
 import { requireAdmin, requireClean, requireRole } from "../middleware"
 import { isNewEmployee } from "../validators";
+import { User } from "@prisma/client";
 
 const router = Router()
 
@@ -29,7 +30,7 @@ router.post("/register-admin",
             const user = await createUser({ empNumber, password, role: "Admin", name: name ?? null })
             const { accessToken, refreshToken } = generateTokens(user, jti)
             await whiteListRefreshToken({ jti, refreshToken, userId: user.id })
-            res.status(200).json({ accessToken, refreshToken }).send()
+            return res.status(200).json({ accessToken, refreshToken }).send()
         } catch (error) {
             console.error(error)
             return res.status(500).send()
@@ -61,7 +62,7 @@ router.post("/create-user",
 
 
 router.post("/login",
-    body("empNumber").isNumeric().isLength({ min: 4, max: 4 }),
+    body("empNumber").isNumeric().isLength({ min: 4, max: 4 }).not().custom(isNewEmployee),
     body("password").isLength({ min: 6 }),
     async (req, res) => {
         try {
@@ -73,10 +74,7 @@ router.post("/login",
                 return res.status(401).send("Invalid credentials");
             }
             const { empNumber, password } = req.body;
-            const existingUser = await findUserByempNumber(empNumber);
-            if (!existingUser) {
-                return res.status(401).send("Invalid credentials");
-            }
+            const existingUser = await findUserByempNumber(empNumber) as User // cannot be null because passed validation
             const validPassword = await bcrypt.compare(password, existingUser.password);
             if (!validPassword) {
                 return res.status(401).send("Invalid credentials");
@@ -87,7 +85,10 @@ router.post("/login",
             await whiteListRefreshToken({ jti, refreshToken, userId: existingUser.id })
             res.status(200).json({ accessToken, refreshToken }).send()
         } catch (error) {
-            res.status(500).send(error)
+            // for the same reason as described in the earlier comment block; we should not send back any
+            // diagnostic information.
+            console.error(error)
+            res.status(401).send("Invalid credentials")
         }
     })
 

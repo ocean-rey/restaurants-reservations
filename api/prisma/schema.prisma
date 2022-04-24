@@ -16,22 +16,40 @@ enum Role {
 }
 
 model User {
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  id  String  @id @unique @default(uuid())
-  empNumber  String  @unique
-  name  String?
-  password  String
-  role Role
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  id            String         @id @unique @default(uuid())
+  empNumber     String         @unique
+  name          String?
+  password      String
+  role          Role
   refreshTokens RefreshToken[]
 }
 
 model RefreshToken {
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  id  String  @id @unique @default(uuid())
-  userId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  id          String   @id @unique @default(uuid())
+  userId      String
   hashedToken String
-  revoked Boolean @default(false)
-  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked     Boolean  @default(false)
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Table {
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  id           Int           @id @unique
+  numSeats     Int
+  reservations Reservation[]
+}
+
+model Reservation {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  id        String   @id @unique @default(uuid())
+  tableId   Int
+  startTime DateTime
+  endTime   DateTime
+  Table     Table    @relation(fields: [tableId], references: [id])
 }
