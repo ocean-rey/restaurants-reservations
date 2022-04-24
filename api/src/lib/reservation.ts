@@ -1,35 +1,46 @@
+import { Prisma, Reservation, Table } from "@prisma/client";
 import { Reservations, Tables } from "../utils/db";
 import { getTables } from "./table";
 
 // note that everything is using gmt +0
-export async function getReservations(page?: number) {
-    const reservations = await Reservations.findMany(
-        {
-            take: 10,
-            skip: page ? page * 10 : 0,
-            include: { Table: true }
-        });
+export async function getReservations({ page, filters }: {
+    page: number, filters: {
+        to: Date, from: Date, tableId: number
+    } | undefined
+}) {
+    const searchParam: Prisma.ReservationFindManyArgs = {
+        include: { Table: true },
+    }
+    page ? () => { searchParam.take = 10; searchParam.skip = (page - 1) * 10 } : null
+    filters ? () => {
+        const where: Prisma.ReservationWhereInput = {};
+        filters.tableId ? () => { where.tableId = filters.tableId } : null;
+        (filters.from && filters.to) ? () => { where.startTime = { lte: filters.to, gte: filters.from } } : null;
+    } : null
+    const reservations = await Reservations.findMany(searchParam) as (Reservation & {
+        Table: Table;
+    })[]
     const cleanedReservations = reservations.map(({ Table, startTime, endTime, id }) => ({ table: { id: Table.id, numSeats: Table.numSeats }, startTime, endTime }));
     return cleanedReservations;
 }
 
-export async function getTodayReservations(sort: "asc" | "desc", page?: number) {
-    const today = new Date();
-    const todayString = `${today.getFullYear}-${today.getMonth}-${today.getDate}`
-    const openTime = "T12:00"
-    const closeTime = "T23:59"
+export async function getTodayReservations(sort?: "asc" | "desc", page?: number) {
+    const openTime = new Date();
+    openTime.setHours(12, 0, 0, 0);
+    const closeTime = openTime;
+    closeTime.setHours(12, 0, 0, 0);
     const reservations = await Reservations.findMany(
         {
             take: 10,
             skip: page ? page * 10 : 0,
             where: {
                 startTime:
-                    { gte: todayString + openTime },
+                    { gte: openTime },
                 endTime:
-                    { lte: todayString + closeTime }
+                    { lte: closeTime }
             },
             include: { Table: true },
-            orderBy: { startTime: sort }
+            orderBy: { startTime: sort ?? "asc" }
         })
     const cleanedReservations = reservations.map(({ Table, startTime, endTime, id }) => ({ table: { id: Table.id, numSeats: Table.numSeats }, startTime, endTime }));
     return cleanedReservations;
@@ -67,8 +78,7 @@ export async function getAvailableSlots(numSeats: number) {
         currentDate.setHours(12, 0, 0, 0);
     }
     const closingDate = new Date(currentDate)
-    closingDate.setHours(23, 59, 0, 0)
-
+    closingDate.setHours(23, 59, 59, 59)
     // find minimal table
     const minimalTable = await Tables.findFirst({ orderBy: { numSeats: "asc" }, where: { numSeats: { gte: numSeats } } })
     if (!minimalTable) {
@@ -93,6 +103,7 @@ export async function getAvailableSlots(numSeats: number) {
         })
     // if there exists a minimal table without any reservations; we are done
     if (validTables[0].reservations.length === 0) {
+        console.log("There exists a minimal table without any reservations.")
         return [toMeridianTime({ start: currentDate, end: closingDate })] // wrapping in array for consistancy 
     }
     // if not; we have some work to do
@@ -103,34 +114,40 @@ export async function getAvailableSlots(numSeats: number) {
     // i hate that this is exponential time but figuring out a linear time solution would take a while
     for (let tIndex = 0; tIndex < validTables.length; tIndex++) {
         const reservations = validTables[tIndex].reservations;
+        console.log(reservations)
         timeBlocks[tIndex] = []
         for (let rIndex = 0; rIndex < reservations.length; rIndex++) {
             const currentReservation = reservations[rIndex];
-            // handle when there are no more reservations but there is some extra time at eod
-            if (rIndex === reservations.length - 1 && Math.abs(timeCursor - closingTime) > 60000) {
-                // if we get here; we also need to check this case before pushing
-                if (rIndex === 0 && currentReservation.startTime.getTime() < timeCursor) {
-                    console.log("Congratulations on finding the edgiest edge case.")
-                    timeCursor = currentReservation.endTime.getTime();
-                }
-                console.log("No more reservations; using remaining time.")
-                timeBlocks[tIndex].push({ start: timeCursor, end: closingTime })
-                continue
-            }
             // special case to handle for the first returned reservation if it starts before current time
             if (rIndex === 0 && currentReservation.startTime.getTime() < timeCursor) {
+                console.log("First reservation starts before current time")
                 timeCursor = currentReservation.endTime.getTime();
+                // if the first reservation is also the last
+                if (reservations.length === 1 && Math.abs(timeCursor - closingTime) > 60000) {
+                    console.log("No more reservations; using remaining time.")
+                    timeBlocks[tIndex].push({ start: timeCursor, end: closingTime })
+                }
                 continue
             }
             // handle continuous reservations
             if (Math.abs(timeCursor - currentReservation.startTime.getTime()) < 60000) {
-                console.log("continuous reservations; skipping")
+                console.log("Skipping continuous reservation.")
                 timeCursor = currentReservation.endTime.getTime();
+                //  if there are no more remaining reservations, use remaining time before continuing
+                if (rIndex === reservations.length - 1 && Math.abs(timeCursor - closingTime) > 60000) {
+                    console.log("No more reservations; using remaining time.")
+                    timeBlocks[tIndex].push({ start: timeCursor, end: closingTime })
+                }
                 continue
             }
             console.log("No edge cases found, continuing normally.")
             timeBlocks[tIndex].push({ start: timeCursor, end: currentReservation.startTime.getTime() })
             timeCursor = currentReservation.endTime.getTime();
+            // check for remaining time if we naturally reached the end of the reservation list
+            if (rIndex === reservations.length - 1 && Math.abs(timeCursor - closingTime) > 60000) {
+                console.log("No more reservations; using remaining time.")
+                timeBlocks[tIndex].push({ start: timeCursor, end: closingTime })
+            }
         }
     }
     // timeBlocks are set up; now we need to clean up.
