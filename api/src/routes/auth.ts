@@ -7,35 +7,11 @@ import jwt from "jsonwebtoken"
 import { generateTokens, hashToken } from "../utils/jwt"
 import { findRefreshTokenById, revokeRefreshToken, revokeUserTokens, whiteListRefreshToken } from "../lib/auth"
 import { findUserById, createUser, findUserByempNumber } from "../lib/user"
-import { requireAdmin, requireClean, requireRole } from "../middleware"
+import { requireAdmin } from "../middleware"
 import { isNewEmployee } from "../validators";
 import { User } from "@prisma/client";
 
 const router = Router()
-
-router.post("/register-admin",
-    requireClean,
-    body("password").isLength({ min: 6 }).withMessage("must be at least 6 chars long"),
-    body("empNumber").isNumeric().withMessage("must be numeric string")
-        .isLength({ max: 4, min: 4 }).withMessage("must be 4 chars long"),
-    async (req, res) => {
-        try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
-            const { empNumber, password, name } = req.body;
-            const jti = uuidv4()
-            // if there is a password; it must be > 5 char long
-            const user = await createUser({ empNumber, password, role: "Admin", name: name ?? null })
-            const { accessToken, refreshToken } = generateTokens(user, jti)
-            await whiteListRefreshToken({ jti, refreshToken, userId: user.id })
-            return res.status(200).json({ accessToken, refreshToken }).send()
-        } catch (error) {
-            console.error(error)
-            return res.status(500).send()
-        }
-    })
 
 router.post("/create-user",
     requireAdmin,
@@ -52,7 +28,7 @@ router.post("/create-user",
             }
             const { empNumber, password, role, name } = req.body;
             const user = await createUser({ empNumber, password, role, name: name ?? null })
-            const {password: foo, ...output} = user; // es6 spread and deconstruction. foo is not used
+            const { password: foo, ...output } = user; // es6 spread and deconstruction. foo is not used
             res.status(200).json(output).send()
         } catch (error) {
             console.error(error);

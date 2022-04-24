@@ -3,6 +3,7 @@ import bodyParser from 'body-parser'
 import auth from "./routes/auth"
 import table from "./routes/table"
 import reservation from "./routes/reservation"
+import { createUser, findUserByempNumber } from './lib/user'
 
 const app = express()
 const port = 3000
@@ -17,8 +18,14 @@ router.use("/table", table)
 router.use("/reservation", reservation)
 app.use(router)
 
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`)
+app.listen(port, async () => {
+    const user = await findUserByempNumber("0000");
+    if (!user) {
+        console.log("Creating default admin..")
+        await createUser({ empNumber: "0000", password: "admin", role: "Admin" })
+        console.log("Default credentials:")
+        console.table({ empNumber: "0000", password: "admin" })
+    }
 })
 
 

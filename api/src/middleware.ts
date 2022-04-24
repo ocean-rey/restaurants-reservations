@@ -41,11 +41,3 @@ export const requireAdmin = async (req: Request, res: Response, next: NextFuncti
     }
     return next()
 })
-export const requireClean = async (req: Request, res: Response, next: NextFunction) => {
-    // check that the db is actually clean
-    const count = await Users.count();
-    if (count === 0) {
-        return next()
-    }
-    return res.status(401).send("Already initialized!")
-}
