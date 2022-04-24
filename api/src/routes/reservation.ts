@@ -13,11 +13,9 @@ router.get("/available-slots", query("seats").isNumeric(), requireRole, async (r
             return res.status(400).json({ errors: errors.array() });
         }
         var seats = req.query.seats as string
-        const availableSlots = await getAvailableSlots(parseInt(seats)).catch(err => {
-            return res.status(404).send(err)
-        })
-        return res.status(200).json(availableSlots).send()
-
+        const availableSlots = await getAvailableSlots(parseInt(seats))
+        //@ts-expect-error for self evident reasons
+        return res.status(availableSlots.error ? 404 : 200).send(availableSlots)
     } catch (error) {
         console.error(error)
         return res.status(500).send()
@@ -36,10 +34,9 @@ router.post("/book",
                 return res.status(400).json({ errors: errors.array() });
             }
             const { startTime, endTime, numSeats } = req.body
-            const booking = await reserveTable({ startTime, endTime, numSeats }).catch(err => {
-                return res.status(404).send(err)
-            })
-            return res.status(200).json(booking).send()
+            const booking = await reserveTable({ startTime, endTime, numSeats })
+            //@ts-expect-error 
+            return res.status(booking.error ? 404 : 200).json(booking).send()
         } catch (error) {
             console.error(error)
             return res.status(500).send()

@@ -45,7 +45,7 @@ export async function getTodayReservations(sort: "asc" | "desc", page: number) {
 export async function reserveTable({ startTime, endTime, numSeats }: ReserveTableParams) {
     const minimalTable = await Tables.findFirst({ orderBy: { numSeats: "asc" }, where: { numSeats: { gte: numSeats } } })
     if (!minimalTable) {
-        throw new Error("No table with that many seats exists!")
+        return { error: "No table with that many seats exists!" }
     }
     const availableTable = await Tables.findFirst(
         {
@@ -62,7 +62,7 @@ export async function reserveTable({ startTime, endTime, numSeats }: ReserveTabl
             }
         })
     if (!availableTable) {
-        throw new Error("No table available with specified parameters!")
+        return { error: "No table available with specified parameters!" }
     }
     const reservation = await Reservations.create({ data: { tableId: availableTable.id, startTime, endTime } })
     return reservation
@@ -78,7 +78,7 @@ export async function getAvailableSlots(numSeats: number) {
     // find minimal table
     const minimalTable = await Tables.findFirst({ orderBy: { numSeats: "asc" }, where: { numSeats: { gte: numSeats } } })
     if (!minimalTable) {
-        throw new Error(`No tables available with numSeats >= ${numSeats}`)
+        return { error: `No tables available with numSeats >= ${numSeats}` }
     }
     const minimalSeats = minimalTable.numSeats;
     // get all minimal tables along with thier remaining reservations (for the rest of the day)
