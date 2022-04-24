@@ -22,9 +22,9 @@ app.listen(port, async () => {
     const user = await findUserByempNumber("0000");
     if (!user) {
         console.log("Creating default admin..")
-        await createUser({ empNumber: "0000", password: "admin", role: "Admin" })
+        await createUser({ empNumber: "0000", password: "admin0", role: "Admin" })
         console.log("Default credentials:")
-        console.table({ empNumber: "0000", password: "admin" })
+        console.table({ empNumber: "0000", password: "admin0" })
     }
 })
 
