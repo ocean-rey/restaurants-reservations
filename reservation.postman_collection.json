@@ -1,0 +1,357 @@
+{
+	"info": {
+		"_postman_id": "fc07bd89-7f8b-4512-99e8-42eca910e17a",
+		"name": "reservation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "create-user",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "authorization",
+								"value": "{{Admin Access Token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"empNumber\": \"0001\",\n    \"password\": \"password\",\n    \"name\": \"employee name\",\n    \"role\": \"Employee\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/auth/create-user",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"auth",
+								"create-user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"empNumber\": \"0000\", \"password\": \"admin0\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/auth/login",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refresh-token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3NWU1ZGE1OS03ZTNiLTRlNzktYTM3Zi1hMWE5NDNlY2MxODciLCJqdGkiOiI2YmZhOWU1OC1lNzhhLTQyMWMtYTkxZC04YjZiMDE2MjY0YTYiLCJpYXQiOjE2NTA3NjQ0NjksImV4cCI6MTY1MDkzNzI2OX0.T2AcY8ZCesYl44KnB2NXrv2Q8fpMZwmT5SPFGFESwr0\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/auth/refresh-token",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "table",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin Access Token}}",
+								"description": "admin access token",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "localhost/table",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"table"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin Access Token}}",
+								"description": "Admin access token",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tableNumber\": 7, \"numSeats\":5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/table/create",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"table",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin Access Token}}",
+								"description": "Must be an access token with Admin role",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "localhost/table?id=3",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"table"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "reservations",
+			"item": [
+				{
+					"name": "available-slots",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin Access Token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "localhost/reservation/available-slots?seats=1",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"reservation",
+								"available-slots"
+							],
+							"query": [
+								{
+									"key": "seats",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-today",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin Access Token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "localhost/reservation/today?page=1&sort=desc",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"reservation",
+								"today"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "sort",
+									"value": "desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-all",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin Access Token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"page\": 1, \"filter\": {\"tableId\": 3}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/reservation",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"reservation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Admin Access Token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"startTime\": \"2022-04-24T12:30:00.797Z\",\n    \"endTime\":\"2022-04-24T13:00:00.797Z\",\n    \"numSeats\":2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost/reservation/book",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"reservation",
+								"book"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "Admin Access Token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3NWU1ZGE1OS03ZTNiLTRlNzktYTM3Zi1hMWE5NDNlY2MxODciLCJpYXQiOjE2NTA3NjQ0NjksImV4cCI6MTY1MDc2NjI2OX0._dHQeZp5ertHbCB4zaSFAZGXAFwzBKG9AzyQdddkXnk"
+		}
+	]
+}
