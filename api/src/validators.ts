@@ -79,6 +79,9 @@ export const noReservations: CustomValidator = value => {
 
 export const validReservationFilters: CustomValidator = (value, meta) => {
     try {
+        if(!value){
+            return
+        }
         // to xand from
         if (value.to) {
             if (!value.from) {
@@ -95,8 +98,6 @@ export const validReservationFilters: CustomValidator = (value, meta) => {
             if (typeof value.tableId != "number") {
                 return Promise.reject("tableId must be a number")
             }
-            // check that it exists
-            ()=>tableExists(value.tableId, meta)
         }
 
     } catch (error) {

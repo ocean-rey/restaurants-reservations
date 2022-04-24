@@ -3,11 +3,7 @@ import { Reservations, Tables } from "../utils/db";
 import { getTables } from "./table";
 
 // note that everything is using gmt +0
-export async function getReservations({ page, filters }: {
-    page: number, filters: {
-        to: Date, from: Date, tableId: number
-    } | undefined
-}) {
+export async function getReservations({ page, filters }: GetReservationsParams) {
     const searchParam: Prisma.ReservationFindManyArgs = {
         include: { Table: true },
     }
@@ -24,7 +20,7 @@ export async function getReservations({ page, filters }: {
     return cleanedReservations;
 }
 
-export async function getTodayReservations(sort?: "asc" | "desc", page?: number) {
+export async function getTodayReservations(sort: "asc" | "desc", page: number) {
     const openTime = new Date();
     openTime.setHours(12, 0, 0, 0);
     const closeTime = openTime;
@@ -32,7 +28,7 @@ export async function getTodayReservations(sort?: "asc" | "desc", page?: number)
     const reservations = await Reservations.findMany(
         {
             take: 10,
-            skip: page ? page * 10 : 0,
+            skip: (page - 1) * 10,
             where: {
                 startTime:
                     { gte: openTime },
@@ -40,9 +36,9 @@ export async function getTodayReservations(sort?: "asc" | "desc", page?: number)
                     { lte: closeTime }
             },
             include: { Table: true },
-            orderBy: { startTime: sort ?? "asc" }
+            orderBy: { startTime: sort }
         })
-    const cleanedReservations = reservations.map(({ Table, startTime, endTime, id }) => ({ table: { id: Table.id, numSeats: Table.numSeats }, startTime, endTime }));
+    const cleanedReservations = reservations.map(({ Table, startTime, endTime, id }) => ({ table: { id: Table.id, numSeats: Table.numSeats }, startTime, endTime, id }));
     return cleanedReservations;
 }
 
@@ -179,4 +175,13 @@ type ReserveTableParams = {
     startTime: Date;
     endTime: Date;
     numSeats: number
+}
+
+type GetReservationsParams = {
+    page: number | undefined,
+    filters: {
+        to: Date,
+        from: Date,
+        tableId: number
+    } | undefined
 }
