@@ -48,6 +48,7 @@ export const tableExists: CustomValidator = value => {
         }))
     } catch (error) {
         // logging just in case
+        console.log("tableExists validator error")
         console.error(error)
         return Promise.reject("Unable to get table")
     }
@@ -60,16 +61,47 @@ export const noReservations: CustomValidator = value => {
     // if the first requirment is reworded: Do not allow a table to be deleted if the table has any /future/ reservations."
     // for now; i will build according to the design document but this should be re-analyzed
     try {
-        if(!value && value != '0'){
+        if (!value && value != '0') {
             return Promise.reject("No id provided")
         }
         value = parseInt(value)
-        return Reservations.count({where: {tableId: value}}).then((count)=>{
-            if (count != 0){
+        return Reservations.count({ where: { tableId: value } }).then((count) => {
+            if (count != 0) {
                 return Promise.reject("Cannot delete table with reservations")
             }
         })
     } catch (error) {
-        
+        console.log("noReservations validator error")
+        console.error(error)
+        return Promise.reject("Unable to tell if table has reservations")
+    }
+}
+
+export const validReservationFilters: CustomValidator = (value, meta) => {
+    try {
+        // to xand from
+        if (value.to) {
+            if (!value.from) {
+                return Promise.reject("Cannot have filters.to without filters.from")
+            }
+        }
+        if (value.from) {
+            if (!value.to) {
+                return Promise.reject("Cannot have filters.from without filters.to")
+            }
+        }
+        // check that tableId is a number
+        if (value.tableId) {
+            if (typeof value.tableId != "number") {
+                return Promise.reject("tableId must be a number")
+            }
+            // check that it exists
+            ()=>tableExists(value.tableId, meta)
+        }
+
+    } catch (error) {
+        console.log("validReservationFilters validator error");
+        console.error(error);
+        // likely a no op
     }
 }

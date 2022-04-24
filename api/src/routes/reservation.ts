@@ -2,6 +2,7 @@ import { Router } from "express";
 import { body, query, validationResult } from "express-validator";
 import { getAvailableSlots, getReservations, getTodayReservations, reserveTable } from "../lib/reservation";
 import { requireAdmin, requireRole } from "../middleware";
+import { validReservationFilters } from "../validators";
 
 const router = Router();
 
@@ -56,7 +57,7 @@ router.get("/today", requireRole, query("page").isNumeric(), query("sort").isIn(
     }
 })
 
-router.post("/", requireAdmin, body("page").isInt({ min: 1 }), body("filters").isObject(), async (req, res) => {
+router.post("/", requireAdmin, body("page").isInt({ min: 1 }), body("filters").isObject().custom(validReservationFilters), async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
