@@ -12,6 +12,7 @@ export async function getReservations({ page, filters }: GetReservationsParams) 
         const where: Prisma.ReservationWhereInput = {};
         filters.tableId ? () => { where.tableId = filters.tableId } : null;
         (filters.from && filters.to) ? () => { where.startTime = { lte: filters.to, gte: filters.from } } : null;
+        searchParam.where = where;
     } : null
     const reservations = await Reservations.findMany(searchParam) as (Reservation & {
         Table: Table;
